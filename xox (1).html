@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XOX GAME | RISS505</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 100%);
+            color: #e0e0ff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Panel Kontrol */
+        .control-panel {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            width: 100%;
+            background: rgba(30, 30, 70, 0.7);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 25px rgba(0, 120, 255, 0.2);
+            border: 1px solid rgba(80, 140, 255, 0.3);
+        }
+
+        .mode-selector, .difficulty-selector {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .mode-selector h3, .difficulty-selector h3 {
+            color: #80c0ff;
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #2a2a5a, #1a1a3a);
+            color: #a0d0ff;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(100, 150, 255, 0.2);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:hover {
+            background: linear-gradient(135deg, #3a3a6a, #2a2a4a);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 100, 255, 0.3);
+        }
+
+        .btn.active {
+            background: linear-gradient(135deg, #0066ff, #0099ff);
+            color: white;
+            box-shadow: 0 0 15px rgba(0, 150, 255, 0.7);
+        }
+
+        /* Tombol Start */
+        .start-btn {
+            padding: 16px 50px;
+            background: linear-gradient(135deg, #00cc66, #00ff88);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 1.3rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 25px rgba(0, 255, 100, 0.3);
+            border: 1px solid rgba(100, 255, 150, 0.5);
+            letter-spacing: 1px;
+            margin-top: 10px;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 255, 100, 0.5);
+            background: linear-gradient(135deg, #00ff88, #66ffaa);
+        }
+
+        .start-btn:disabled {
+            background: linear-gradient(135deg, #666, #888);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Area Game */
+        .game-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+            width: 100%;
+            opacity: 0.5;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        .game-area.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .status {
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-align: center;
+            padding: 15px 30px;
+            background: rgba(20, 40, 80, 0.7);
+            border-radius: 15px;
+            min-width: 300px;
+            border: 1px solid rgba(0, 180, 255, 0.4);
+            box-shadow: 0 0 20px rgba(0, 180, 255, 0.2);
+            color: #80e0ff;
+            transition: all 0.3s ease;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-gap: 12px;
+            background: rgba(40, 40, 100, 0.5);
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 100, 255, 0.2);
+            border: 1px solid rgba(100, 150, 255, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cell {
+            width: 120px;
+            height: 120px;
+            background: rgba(25, 25, 60, 0.8);
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 4.5rem;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(100, 150, 255, 0.3);
+            color: transparent;
+            text-shadow: 0 0 10px currentColor;
+        }
+
+        .cell:hover {
+            background: rgba(40, 40, 100, 0.9);
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(0, 150, 255, 0.4);
+        }
+
+        .cell.x {
+            color: #ff5555;
+            text-shadow: 0 0 20px #ff5555;
+        }
+
+        .cell.o {
+            color: #55aaff;
+            text-shadow: 0 0 20px #55aaff;
+        }
+
+        .cell.win {
+            animation: pulse 1.5s infinite;
+            background: rgba(60, 100, 200, 0.4);
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 10px rgba(0, 150, 255, 0.5); }
+            50% { box-shadow: 0 0 25px rgba(0, 200, 255, 0.8); }
+            100% { box-shadow: 0 0 10px rgba(0, 150, 255, 0.5); }
+        }
+
+        /* Tombol Reset */
+        .reset-btn {
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #ff3366, #ff5588);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            box-shadow: 0 8px 20px rgba(255, 50, 100, 0.3);
+            border: 1px solid rgba(255, 100, 150, 0.5);
+        }
+
+        .reset-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(255, 50, 100, 0.5);
+            background: linear-gradient(135deg, #ff5588, #ff77aa);
+        }
+
+        /* Elemen bergerak seperti sarang laba-laba di background */
+        .web-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .web-strand {
+            position: absolute;
+            background: linear-gradient(90deg, transparent, rgba(0, 200, 255, 0.3), transparent);
+            transform-origin: top left;
+            height: 1px;
+        }
+
+        .web-node {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: radial-gradient(circle, #00ccff, #0066ff);
+            border-radius: 50%;
+            box-shadow: 0 0 10px #00aaff;
+            z-index: 2;
+        }
+
+        /* Responsif */
+        @media (max-width: 768px) {
+            .cell {
+                width: 90px;
+                height: 90px;
+                font-size: 3.5rem;
+            }
+            
+            .control-panel {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .status {
+                font-size: 1.5rem;
+                min-width: 250px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .cell {
+                width: 70px;
+                height: 70px;
+                font-size: 2.8rem;
+            }
+            
+            .status {
+                font-size: 1.3rem;
+                min-width: 200px;
+            }
+            
+            .btn {
+                padding: 10px 18px;
+                font-size: 0.9rem;
+            }
+            
+            .start-btn {
+                padding: 14px 30px;
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background dengan sarang laba-laba bergerak -->
+    <div class="web-background" id="web-background">
+        <!-- Web strands akan dibuat dengan JavaScript -->
+    </div>
+    
+    <div class="container">
+        <div class="control-panel">
+            <div class="mode-selector">
+                <h3><i class="fas fa-users"></i> MODE PERMAINAN</h3>
+                <div class="buttons">
+                    <button class="btn active" id="twoPlayerMode">2 Pemain</button>
+                    <button class="btn" id="vsComputerMode">Vs Komputer</button>
+                </div>
+            </div>
+            
+            <div class="difficulty-selector">
+                <h3><i class="fas fa-robot"></i> LEVEL KESULITAN</h3>
+                <div class="buttons">
+                    <button class="btn" id="easyMode">Mudah</button>
+                    <button class="btn active" id="hardMode">Sulit</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tombol Start -->
+        <button class="start-btn" id="start-btn">
+            <i class="fas fa-play-circle"></i> START GAME
+        </button>
+        
+        <div class="game-area" id="game-area">
+            <div class="status" id="status">Giliran: <span id="current-player">X</span></div>
+            
+            <div class="game-board" id="game-board">
+                <!-- Sel-sel game akan dibuat dengan JavaScript -->
+            </div>
+            
+            <button class="reset-btn" id="reset-btn">
+                <i class="fas fa-redo"></i> RESTART PERMAINAN
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Elemen DOM
+        const gameBoard = document.getElementById('game-board');
+        const statusDisplay = document.getElementById('status');
+        const currentPlayerDisplay = document.getElementById('current-player');
+        const resetButton = document.getElementById('reset-btn');
+        const startButton = document.getElementById('start-btn');
+        const gameArea = document.getElementById('game-area');
+        const twoPlayerModeBtn = document.getElementById('twoPlayerMode');
+        const vsComputerModeBtn = document.getElementById('vsComputerMode');
+        const easyModeBtn = document.getElementById('easyMode');
+        const hardModeBtn = document.getElementById('hardMode');
+        const webBackground = document.getElementById('web-background');
+
+        // Variabel game
+        let gameState = ['', '', '', '', '', '', '', '', ''];
+        let currentPlayer = 'X';
+        let gameActive = false; // Awalnya non-aktif
+        let gameMode = 'twoPlayer'; // 'twoPlayer' atau 'vsComputer'
+        let difficulty = 'hard'; // 'easy' atau 'hard'
+        let moveCount = 0;
+        let gameStarted = false;
+
+        // Variabel untuk animasi background
+        let webNodes = [];
+        let webStrands = [];
+        let animationId = null;
+
+        // Pesan kemenangan
+        const winningMessage = () => `Pemain ${currentPlayer} MENANG!`;
+        const drawMessage = () => `Permainan SERI!`;
+        const currentPlayerTurn = () => `Giliran: <span id="current-player">${currentPlayer}</span>`;
+
+        // Kondisi kemenangan
+        const winningConditions = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8], // Baris
+            [0, 3, 6], [1, 4, 7], [2, 5, 8], // Kolom
+            [0, 4, 8], [2, 4, 6]             // Diagonal
+        ];
+
+        // Fungsi untuk membuat dan menggerakkan sarang laba-laba
+        function createAndAnimateWebBackground() {
+            // Hapus elemen lama
+            webBackground.innerHTML = '';
+            webNodes = [];
+            webStrands = [];
+            
+            // Hentikan animasi sebelumnya jika ada
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+            
+            // Jumlah node dan strand
+            const nodeCount = 20;
+            const strandCount = 40;
+            
+            // Buat node dengan posisi dan kecepatan
+            for (let i = 0; i < nodeCount; i++) {
+                const node = document.createElement('div');
+                node.className = 'web-node';
+                
+                // Posisi awal acak
+                const posX = Math.random() * 100;
+                const posY = Math.random() * 100;
+                
+                // Kecepatan acak untuk gerakan
+                const speedX = (Math.random() - 0.5) * 0.2;
+                const speedY = (Math.random() - 0.5) * 0.2;
+                
+                node.style.left = `${posX}%`;
+                node.style.top = `${posY}%`;
+                
+                webBackground.appendChild(node);
+                
+                // Simpan data node
+                webNodes.push({
+                    element: node,
+                    x: posX,
+                    y: posY,
+                    speedX: speedX,
+                    speedY: speedY,
+                    radius: 4
+                });
+            }
+            
+            // Buat strand (benang) antar node
+            for (let i = 0; i < strandCount; i++) {
+                const strand = document.createElement('div');
+                strand.className = 'web-strand';
+                
+                // Pilih dua node acak
+                const nodeIndexA = Math.floor(Math.random() * webNodes.length);
+                const nodeIndexB = Math.floor(Math.random() * webNodes.length);
+                
+                if (nodeIndexA === nodeIndexB) continue;
+                
+                const nodeA = webNodes[nodeIndexA];
+                const nodeB = webNodes[nodeIndexB];
+                
+                // Simpan data strand
+                webStrands.push({
+                    element: strand,
+                    nodeA: nodeIndexA,
+                    nodeB: nodeIndexB,
+                    opacity: 0.1 + Math.random() * 0.3
+                });
+                
+                webBackground.appendChild(strand);
+            }
+            
+            // Mulai animasi
+            animateWebBackground();
+        }
+
+        // Fungsi untuk menggerakkan sarang laba-laba
+        function animateWebBackground() {
+            // Update posisi semua node
+            webNodes.forEach(node => {
+                // Gerakkan node
+                node.x += node.speedX;
+                node.y += node.speedY;
+                
+                // Pantulkan dari batas layar
+                if (node.x <= 0 || node.x >= 100) {
+                    node.speedX *= -1;
+                    node.x = node.x <= 0 ? 0.1 : 99.9;
+                }
+                
+                if (node.y <= 0 || node.y >= 100) {
+                    node.speedY *= -1;
+                    node.y = node.y <= 0 ? 0.1 : 99.9;
+                }
+                
+                // Update posisi visual
+                node.element.style.left = `${node.x}%`;
+                node.element.style.top = `${node.y}%`;
+                
+                // Efek berdenyut pada node
+                const pulse = Math.sin(Date.now() / 1000 + node.x) * 0.5 + 0.5;
+                node.element.style.boxShadow = `0 0 ${5 + pulse * 10}px #00aaff`;
+                node.element.style.opacity = 0.5 + pulse * 0.3;
+            });
+            
+            // Update semua strands
+            webStrands.forEach(strand => {
+                const nodeA = webNodes[strand.nodeA];
+                const nodeB = webNodes[strand.nodeB];
+                
+                // Hitung jarak antara node
+                const dx = nodeB.x - nodeA.x;
+                const dy = nodeB.y - nodeA.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                // Hanya tampilkan strand jika node cukup dekat
+                if (distance < 40) {
+                    const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+                    
+                    // Atur posisi dan ukuran strand
+                    strand.element.style.left = `${nodeA.x}%`;
+                    strand.element.style.top = `${nodeA.y}%`;
+                    strand.element.style.width = `${distance}%`;
+                    strand.element.style.transform = `rotate(${angle}deg)`;
+                    
+                    // Efek berdenyut pada strand
+                    const pulse = Math.sin(Date.now() / 800 + strand.nodeA) * 0.3 + 0.4;
+                    strand.element.style.opacity = strand.opacity * pulse;
+                    strand.element.style.background = `linear-gradient(90deg, transparent, rgba(0, ${150 + pulse * 100}, 255, 0.3), transparent)`;
+                    strand.element.style.display = 'block';
+                } else {
+                    strand.element.style.display = 'none';
+                }
+            });
+            
+            // Lanjutkan animasi
+            animationId = requestAnimationFrame(animateWebBackground);
+        }
+
+        // Inisialisasi papan permainan
+        function initializeGameBoard() {
+            gameBoard.innerHTML = '';
+            for (let i = 0; i < 9; i++) {
+                const cell = document.createElement('div');
+                cell.classList.add('cell');
+                cell.setAttribute('data-index', i);
+                cell.addEventListener('click', () => handleCellClick(i));
+                gameBoard.appendChild(cell);
+            }
+            updateStatus();
+        }
+
+        // Update status permainan
+        function updateStatus() {
+            if (gameActive) {
+                statusDisplay.innerHTML = currentPlayerTurn();
+            }
+        }
+
+        // Tangani klik sel
+        function handleCellClick(clickedCellIndex) {
+            // Cek apakah game sudah dimulai dan aktif
+            if (!gameStarted || !gameActive) {
+                return;
+            }
+            
+            // Cek apakah sel sudah terisi atau game tidak aktif
+            if (gameState[clickedCellIndex] !== '' || !gameActive) {
+                return;
+            }
+
+            // Lakukan langkah pemain
+            makeMove(clickedCellIndex, currentPlayer);
+
+            // Cek apakah ada pemenang
+            checkResult();
+
+            // Jika mode vs komputer dan giliran O (komputer)
+            if (gameMode === 'vsComputer' && currentPlayer === 'O' && gameActive) {
+                setTimeout(() => computerMove(), 500);
+            }
+        }
+
+        // Lakukan langkah
+        function makeMove(cellIndex, player) {
+            gameState[cellIndex] = player;
+            const cell = document.querySelector(`.cell[data-index="${cellIndex}"]`);
+            cell.textContent = player;
+            cell.classList.add(player.toLowerCase());
+            moveCount++;
+        }
+
+        // Cek hasil permainan
+        function checkResult() {
+            let roundWon = false;
+            let winningCombo = [];
+
+            // Cek kondisi kemenangan
+            for (let i = 0; i < winningConditions.length; i++) {
+                const [a, b, c] = winningConditions[i];
+                if (gameState[a] && gameState[a] === gameState[b] && gameState[a] === gameState[c]) {
+                    roundWon = true;
+                    winningCombo = winningConditions[i];
+                    break;
+                }
+            }
+
+            if (roundWon) {
+                // Tampilkan pemenang
+                statusDisplay.innerHTML = winningMessage();
+                gameActive = false;
+                
+                // Highlight sel pemenang
+                winningCombo.forEach(index => {
+                    document.querySelector(`.cell[data-index="${index}"]`).classList.add('win');
+                });
+                return;
+            }
+
+            // Cek apakah seri
+            if (moveCount === 9) {
+                statusDisplay.innerHTML = drawMessage();
+                gameActive = false;
+                return;
+            }
+
+            // Ganti giliran
+            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+            updateStatus();
+        }
+
+        // Langkah komputer
+        function computerMove() {
+            if (!gameActive) return;
+            
+            let availableCells = [];
+            gameState.forEach((cell, index) => {
+                if (cell === '') availableCells.push(index);
+            });
+            
+            if (availableCells.length === 0) return;
+            
+            let moveIndex;
+            
+            if (difficulty === 'hard') {
+                // AI tingkat sulit: minimax algorithm
+                moveIndex = getBestMove();
+            } else {
+                // AI tingkat mudah: pilih secara acak
+                moveIndex = availableCells[Math.floor(Math.random() * availableCells.length)];
+            }
+            
+            makeMove(moveIndex, 'O');
+            checkResult();
+        }
+
+        // Algoritma minimax untuk AI tingkat sulit
+        function getBestMove() {
+            // Coba cari kemenangan dalam satu langkah
+            for (let i = 0; i < 9; i++) {
+                if (gameState[i] === '') {
+                    gameState[i] = 'O';
+                    if (checkWinner('O')) {
+                        gameState[i] = '';
+                        return i;
+                    }
+                    gameState[i] = '';
+                }
+            }
+            
+            // Coba blokir kemenangan pemain dalam satu langkah
+            for (let i = 0; i < 9; i++) {
+                if (gameState[i] === '') {
+                    gameState[i] = 'X';
+                    if (checkWinner('X')) {
+                        gameState[i] = '';
+                        return i;
+                    }
+                    gameState[i] = '';
+                }
+            }
+            
+            // Pilih tengah jika tersedia
+            if (gameState[4] === '') return 4;
+            
+            // Pilih sudut secara acak
+            const corners = [0, 2, 6, 8];
+            const availableCorners = corners.filter(index => gameState[index] === '');
+            if (availableCorners.length > 0) {
+                return availableCorners[Math.floor(Math.random() * availableCorners.length)];
+            }
+            
+            // Pilih sisi secara acak
+            const sides = [1, 3, 5, 7];
+            const availableSides = sides.filter(index => gameState[index] === '');
+            if (availableSides.length > 0) {
+                return availableSides[Math.floor(Math.random() * availableSides.length)];
+            }
+            
+            // Fallback: pilih secara acak
+            const availableCells = [];
+            gameState.forEach((cell, index) => {
+                if (cell === '') availableCells.push(index);
+            });
+            return availableCells[Math.floor(Math.random() * availableCells.length)];
+        }
+
+        // Fungsi bantu untuk mengecek pemenang
+        function checkWinner(player) {
+            for (let i = 0; i < winningConditions.length; i++) {
+                const [a, b, c] = winningConditions[i];
+                if (gameState[a] === player && gameState[b] === player && gameState[c] === player) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // Start game
+        function startGame() {
+            gameStarted = true;
+            gameActive = true;
+            gameArea.classList.add('active');
+            startButton.disabled = true;
+            startButton.innerHTML = '<i class="fas fa-play-circle"></i> GAME DIMULAI';
+            resetGame();
+        }
+
+        // Reset permainan
+        function resetGame() {
+            gameState = ['', '', '', '', '', '', '', '', ''];
+            gameActive = true;
+            currentPlayer = 'X';
+            moveCount = 0;
+            
+            // Reset tampilan sel
+            document.querySelectorAll('.cell').forEach(cell => {
+                cell.textContent = '';
+                cell.classList.remove('x', 'o', 'win');
+            });
+            
+            updateStatus();
+            
+            // Jika mode vs komputer dan komputer jalan pertama
+            if (gameMode === 'vsComputer' && currentPlayer === 'O') {
+                setTimeout(() => computerMove(), 500);
+            }
+        }
+
+        // Fungsi untuk reset penuh (termasuk ke kondisi sebelum start)
+        function fullReset() {
+            gameStarted = false;
+            gameActive = false;
+            gameArea.classList.remove('active');
+            startButton.disabled = false;
+            startButton.innerHTML = '<i class="fas fa-play-circle"></i> START GAME';
+            
+            gameState = ['', '', '', '', '', '', '', '', ''];
+            currentPlayer = 'X';
+            moveCount = 0;
+            
+            // Reset tampilan sel
+            document.querySelectorAll('.cell').forEach(cell => {
+                cell.textContent = '';
+                cell.classList.remove('x', 'o', 'win');
+            });
+            
+            statusDisplay.innerHTML = 'Giliran: <span id="current-player">X</span>';
+        }
+
+        // Ubah mode permainan
+        twoPlayerModeBtn.addEventListener('click', () => {
+            gameMode = 'twoPlayer';
+            twoPlayerModeBtn.classList.add('active');
+            vsComputerModeBtn.classList.remove('active');
+            if (gameStarted) {
+                resetGame();
+            }
+        });
+
+        vsComputerModeBtn.addEventListener('click', () => {
+            gameMode = 'vsComputer';
+            vsComputerModeBtn.classList.add('active');
+            twoPlayerModeBtn.classList.remove('active');
+            if (gameStarted) {
+                resetGame();
+            }
+        });
+
+        // Ubah tingkat kesulitan
+        easyModeBtn.addEventListener('click', () => {
+            difficulty = 'easy';
+            easyModeBtn.classList.add('active');
+            hardModeBtn.classList.remove('active');
+            if (gameStarted) {
+                resetGame();
+            }
+        });
+
+        hardModeBtn.addEventListener('click', () => {
+            difficulty = 'hard';
+            hardModeBtn.classList.add('active');
+            easyModeBtn.classList.remove('active');
+            if (gameStarted) {
+                resetGame();
+            }
+        });
+
+        // Event listener untuk tombol start
+        startButton.addEventListener('click', startGame);
+
+        // Event listener untuk tombol reset
+        resetButton.addEventListener('click', () => {
+            if (gameStarted) {
+                resetGame();
+            }
+        });
+
+        // Inisialisasi saat halaman dimuat
+        window.addEventListener('DOMContentLoaded', () => {
+            // Buat dan animasi background sarang laba-laba
+            createAndAnimateWebBackground();
+            
+            // Inisialisasi papan game
+            initializeGameBoard();
+            
+            // Tambahkan efek suara (simulasi) pada klik sel
+            const cells = document.querySelectorAll('.cell');
+            cells.forEach(cell => {
+                cell.addEventListener('click', () => {
+                    // Efek visual saat klik
+                    cell.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        cell.style.transform = 'scale(1)';
+                    }, 150);
+                });
+            });
+        });
+
+        // Bersihkan animasi saat halaman ditutup
+        window.addEventListener('beforeunload', () => {
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+        });
+    </script>
+</body>
+</html>
